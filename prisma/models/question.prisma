@@ -1,0 +1,16 @@
+model Question {
+  id        String   @id @default(uuid())
+  text      String
+  response  String?
+  category  String
+  createdAt DateTime @default(now())
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  viewedBy UserQuestionView[]
+
+  @@index([authorId])
+  @@index([category])
+  @@map("questions")
+}

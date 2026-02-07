@@ -1,0 +1,16 @@
+model UserQuestionView {
+  id    String @id @default(uuid())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  viewedAt   DateTime @default(now())
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+  @@map("user_question_views")
+}
