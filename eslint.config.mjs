@@ -49,9 +49,12 @@ export default tseslint.config(
           endOfLine: "auto",
         },
       ],
+      "@typescript-eslint/no-unsafe-assignment": "off",
       // Убедитесь, что правила ESLint для кавычек отключены
       quotes: "off",
       "@typescript-eslint/quotes": "off",
+      indent: "off",
+      "@typescript-eslint/indent": "off",
     },
   },
 );
