@@ -1,0 +1,12 @@
+model User {
+  id        String      @id @default(uuid())
+  login     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  questions     Question[]
+
+  viewedQuestions  UserQuestionView[]
+
+  @@index([login])
+  @@map("users")
+}
