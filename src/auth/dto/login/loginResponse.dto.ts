@@ -10,7 +10,7 @@ export class UserResponseModel {
   @Exclude()
   password: string;
 }
-export class RegisterResponseDto {
+export class LoginResponseDto {
   @Expose()
   @Type(() => UserResponseModel)
   user: UserResponseModel;

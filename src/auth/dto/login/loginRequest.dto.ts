@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength, Matches } from "class-validator";
+import { IsNotEmpty, IsString, MinLength } from "class-validator";
 
 export class LoginRequestDto {
   @IsNotEmpty()
@@ -8,9 +8,6 @@ export class LoginRequestDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(6)
-  @Matches(/(?=.*[a-zA-Z])(?=.*\d)/, {
-    message: "Пароль должен содержать буквы и цифры",
-  })
+  @MinLength(8)
   password: string;
 }

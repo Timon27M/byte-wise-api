@@ -10,18 +10,7 @@ export default tseslint.config(
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  {
-    // Используем плагин Prettier без пресета
-    plugins: {
-      prettier: eslintPluginPrettierRecommended.plugins.prettier,
-    },
-    rules: {
-      ...eslintPluginPrettierRecommended.rules,
-      // Переопределяем правила кавычек
-      quotes: "off",
-      "@typescript-eslint/quotes": "off",
-    },
-  },
+  eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
@@ -49,6 +38,14 @@ export default tseslint.config(
           endOfLine: "auto",
         },
       ],
+      "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
       "@typescript-eslint/no-unsafe-assignment": "off",
       // Убедитесь, что правила ESLint для кавычек отключены
       quotes: "off",

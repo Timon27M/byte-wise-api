@@ -1,8 +1,16 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { RegisterRequestDto } from "./dto/register/registerRequest.dto";
 import { PrismaService } from "src/prisma/prisma.service";
+import { LoginRequestDto } from "./dto/login/loginRequest.dto";
+import { RegisterResponseDto } from "./dto/register/registerResponse.dto";
+import { plainToInstance } from "class-transformer";
+import { LoginResponseDto } from "./dto/login/loginResponse.dto";
 
 @Injectable()
 export class AuthService {
@@ -30,7 +38,9 @@ export class AuthService {
     }
   }
 
-  public async register(registerRequest: RegisterRequestDto) {
+  public async register(
+    registerRequest: RegisterRequestDto,
+  ): Promise<RegisterResponseDto> {
     const existingUser = await this.prismaService.user.findUnique({
       where: { login: registerRequest.login },
     });
@@ -53,11 +63,36 @@ export class AuthService {
     const payload = { sub: user.id, login: user.login };
     const token = this.jwtService.sign(payload);
 
-    const { password, ...userWithoutPassword } = user;
-
-    return {
-      user: userWithoutPassword,
+    return plainToInstance(RegisterResponseDto, {
+      user,
       token,
-    };
+    });
+  }
+
+  public async login(loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
+    const user = await this.prismaService.user.findUnique({
+      where: { login: loginRequest.login },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("Неверный логин или пароль");
+    }
+
+    const isPasswordValid = await this.comparePasswords(
+      loginRequest.password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException("Неверный логин или пароль");
+    }
+
+    const payload = { sub: user.id, login: user.login };
+    const token = this.jwtService.sign(payload);
+
+    return plainToInstance(RegisterResponseDto, {
+      user,
+      token,
+    });
   }
 }
