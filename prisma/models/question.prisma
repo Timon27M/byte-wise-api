@@ -1,8 +1,17 @@
+enum Category {
+  JAVASCRIPT
+  TYPESCRIPT
+  NETWORK
+  REACT
+  REDUX
+  REST
+}
+
 model Question {
   id        String   @id @default(uuid())
-  text      String
+  text      String   @unique
   response  String?
-  category  String
+  category  Category @default(REST)
   createdAt DateTime @default(now())
 
   authorId  String
