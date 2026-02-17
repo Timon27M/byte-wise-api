@@ -21,5 +21,8 @@ model Question {
 
   @@index([authorId])
   @@index([category])
+
+  @@unique([id, authorId])
+
   @@map("questions")
 }

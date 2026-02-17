@@ -1,14 +1,6 @@
+import { $Enums } from "@prisma/client";
 import { Transform } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
-
-enum Category {
-  JAVASCRIPT = "JAVASCRIPT",
-  TYPESCRIPT = "TYPESCRIPT",
-  NETWORK = "NETWORK",
-  REACT = "REACT",
-  REDUX = "REDUX",
-  REST = "REST",
-}
 
 export default class QuestionRequestDto {
   @IsNotEmpty()
@@ -19,10 +11,10 @@ export default class QuestionRequestDto {
   questionResponseText: string;
 
   @IsOptional()
-  @IsEnum(Category, {
+  @IsEnum($Enums.Category, {
     message:
       "Category должна быть одной из следуюущих: JAVASCRIPT, TYPESCRIPT, NETWORK, REACT, REDUX, REST",
   })
-  @Transform(({ value }): Category => value ?? Category.REST)
-  category: Category;
+  @Transform(({ value }): $Enums.Category => value ?? $Enums.Category.REST)
+  category: $Enums.Category;
 }

@@ -1,13 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import {
+  ConflictException,
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+} from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import QuestionRequestDto from "./dto/question/questionRequest.dto";
 import type { TUserDecorator } from "src/types/UserDecorator.type";
-import type { TDefaultResponse } from "./types/DefaultResponse.type";
+import type { TDefaultResponse } from "./types/TDefaultResponse.type";
 import { Prisma } from "@prisma/client";
-import QuestionsAllResponseDto, {
-  QuestionDataDto,
-} from "./dto/questionsAllResponse.dto";
-import { DefaultResponseDto } from "./dto/defaultResponse.dto";
+import { TQuestion } from "./types/TQuestionResponse.type";
+import QuestionsQueryDto from "./dto/questions/questionsQuery.dto";
+import QuestionUpdateDto from "./dto/question/questionUpdateRequest.dto";
 
 @Injectable()
 export class QuestionsService {
@@ -37,31 +41,25 @@ export class QuestionsService {
         message: "Вопрос успешно добавлен!",
       };
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        return {
-          status: "error",
-          statusCode: HttpStatus.CONFLICT,
-          message: "Вопрос с таким текстом уже существует",
-        };
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new ConflictException("Вопрос с таким текстом уже существует");
       }
-      if (error instanceof Error) {
-        return {
-          status: "error",
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: error.message,
-        };
-      }
-      return {
-        status: "error",
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: `Ошибка базы данных: ${error}`,
-      };
+
+      throw error; // всё остальное пойдёт в 500
     }
   }
 
-  public async getAllQuestions() {
-    try {
-      const questions = await this.prismaService.question.findMany({
+  public async getQuestionsByCategory(
+    query: QuestionsQueryDto,
+  ): Promise<TQuestion[]> {
+    const questionsData: TQuestion[] =
+      await this.prismaService.question.findMany({
+        where: {
+          ...(query.category && { category: query.category }),
+        },
         select: {
           text: true,
           category: true,
@@ -69,23 +67,40 @@ export class QuestionsService {
         },
       });
 
-      const responseDto = new QuestionsAllResponseDto();
+    return questionsData;
+  }
 
-      // переписать chatgpt предложил создать globalexceptionFilter
-      responseDto.questions = questions.map((q) => {
-        const questionDto = new QuestionDataDto();
-        questionDto.text = q.text;
-        questionDto.category = q.category;
-        questionDto.response = q.response;
-        return questionDto;
+  public async updateQuestionData(
+    questionId: string,
+    questionData: QuestionUpdateDto,
+    userData: TUserDecorator,
+  ): Promise<TDefaultResponse> {
+    try {
+      await this.prismaService.question.update({
+        where: {
+          id_authorId: {
+            id: questionId,
+            authorId: userData.id,
+          },
+        },
+        data: {
+          ...(questionData.text && { text: questionData.text }),
+          ...(questionData.response && { response: questionData.response }),
+        },
       });
-
-      return responseDto;
+      return {
+        statusCode: 200,
+        message: "Вопрос успешно обнавлен",
+        status: "success",
+      };
     } catch (error) {
-      throw new HttpException(
-        new DefaultResponseDto("error", error, HttpStatus.BAD_REQUEST),
-        HttpStatus.BAD_REQUEST,
-      );
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new ForbiddenException("Вопрос не найден или у вас нет доступа");
+      }
+      throw error;
     }
   }
 }

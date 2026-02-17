@@ -5,7 +5,7 @@ import {
   IsDateString,
   IsOptional,
 } from "class-validator";
-import { type TStatus } from "../types/DefaultResponse.type";
+import { type TStatus } from "../questions/types/TDefaultResponse.type";
 import { HttpStatus } from "@nestjs/common";
 
 enum Status {
