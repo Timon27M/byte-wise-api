@@ -1,15 +1,24 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsString } from "class-validator";
 
-export default class QuestionUpdateDto {
+// export default class QuestionUpdateDto {
+//   @IsOptional()
+//   @IsString()
+//   questionText?: string;
+
+//   @IsOptional()
+//   @IsString()
+//   questionResponseText?: string;
+// }
+
+export class UpdateQuestionTextDto {
+  @IsString()
   @IsNotEmpty()
-  @IsString()
-  questionId: string;
+  questionText: string;
+}
 
-  @IsOptional()
+// DTO для обновления ответа
+export class UpdateQuestionResponseDto {
   @IsString()
-  text?: string;
-
-  @IsOptional()
-  @IsString()
-  response?: string;
+  @IsNotEmpty()
+  questionResponseText: string;
 }

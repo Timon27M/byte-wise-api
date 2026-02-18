@@ -16,7 +16,11 @@ import type { TUserDecorator } from "src/types/UserDecorator.type";
 import { DefaultResponseDto } from "../utils/defaultResponse.dto";
 import QuestionsMapper from "./mappers/questionsMapper";
 import QuestionsQueryDto from "./dto/questions/questionsQuery.dto";
-import QuestionUpdateDto from "./dto/question/questionUpdateRequest.dto";
+import {
+  UpdateQuestionResponseDto,
+  UpdateQuestionTextDto,
+} from "./dto/question/questionUpdateRequest.dto";
+import { UpdateQuestionPipe } from "./pipes/updateQuestionPipe.pipe";
 
 @UseGuards(JwtAuthGuard)
 @Controller("questions")
@@ -49,7 +53,8 @@ export class QuestionsController {
   @Patch(":id")
   async patchQuestionData(
     @Param("id") questionId: string,
-    @Body() questionData: QuestionUpdateDto,
+    @Body(UpdateQuestionPipe)
+    questionData: UpdateQuestionTextDto | UpdateQuestionResponseDto,
     @GetUser() userData: TUserDecorator,
   ) {
     const res = await this.questionsService.updateQuestionData(
@@ -58,7 +63,6 @@ export class QuestionsController {
       userData,
     );
 
-    //Протестировать запрос нужно лезть в БД
     return new DefaultResponseDto(res.status, res.message, res.statusCode);
   }
 }

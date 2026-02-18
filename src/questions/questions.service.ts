@@ -11,7 +11,12 @@ import type { TDefaultResponse } from "./types/TDefaultResponse.type";
 import { Prisma } from "@prisma/client";
 import { TQuestion } from "./types/TQuestionResponse.type";
 import QuestionsQueryDto from "./dto/questions/questionsQuery.dto";
-import QuestionUpdateDto from "./dto/question/questionUpdateRequest.dto";
+import {
+  UpdateQuestionResponseDto,
+  UpdateQuestionTextDto,
+} from "./dto/question/questionUpdateRequest.dto";
+import { isUpdateQuestionTextDtoData } from "./types/quards/isUpdateQuestionTextDtoData.quard";
+import { isUpdateQuestionResponseDtoData } from "./types/quards/isUpdateQuestionResponseDtoData.quard";
 
 @Injectable()
 export class QuestionsService {
@@ -72,7 +77,7 @@ export class QuestionsService {
 
   public async updateQuestionData(
     questionId: string,
-    questionData: QuestionUpdateDto,
+    questionData: UpdateQuestionTextDto | UpdateQuestionResponseDto,
     userData: TUserDecorator,
   ): Promise<TDefaultResponse> {
     try {
@@ -84,8 +89,12 @@ export class QuestionsService {
           },
         },
         data: {
-          ...(questionData.text && { text: questionData.text }),
-          ...(questionData.response && { response: questionData.response }),
+          ...(isUpdateQuestionTextDtoData(questionData) &&
+            questionData.questionText && { text: questionData.questionText }),
+          ...(isUpdateQuestionResponseDtoData(questionData) &&
+            questionData.questionResponseText && {
+              response: questionData.questionResponseText,
+            }),
         },
       });
       return {
