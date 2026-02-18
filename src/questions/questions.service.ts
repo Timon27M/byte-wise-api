@@ -112,4 +112,34 @@ export class QuestionsService {
       throw error;
     }
   }
+
+  public async deleteQuestionData(
+    questionId: string,
+    userData: TUserDecorator,
+  ): Promise<TDefaultResponse> {
+    try {
+      await this.prismaService.question.delete({
+        where: {
+          id_authorId: {
+            id: questionId,
+            authorId: userData.id,
+          },
+        },
+      });
+
+      return {
+        status: "success",
+        statusCode: HttpStatus.ACCEPTED,
+        message: "Вопрос успешно удален!",
+      };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new ForbiddenException("Вопрос не найден или у вас нет доступа");
+      }
+      throw error;
+    }
+  }
 }

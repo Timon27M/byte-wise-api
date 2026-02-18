@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -60,6 +61,19 @@ export class QuestionsController {
     const res = await this.questionsService.updateQuestionData(
       questionId,
       questionData,
+      userData,
+    );
+
+    return new DefaultResponseDto(res.status, res.message, res.statusCode);
+  }
+
+  @Delete(":id")
+  async deleteQuestion(
+    @Param("id") questionId: string,
+    @GetUser() userData: TUserDecorator,
+  ) {
+    const res = await this.questionsService.deleteQuestionData(
+      questionId,
       userData,
     );
 
